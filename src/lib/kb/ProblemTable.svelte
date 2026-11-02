@@ -13,6 +13,10 @@
   const merged = $derived(unique.filter((r) => r.mergedInto === ticket));
   const groups = $derived(groupByProblem(merged, tenantOf, notes.oneDayMove));
   const subjects = $derived(sharedSubjects(groups));
+  // One-day moves inside a cause's count (the desk files them there): cause → count.
+  const inside = (g: (typeof groups)[number]) =>
+    g.problem === 'one-day' ? 0 : g.reports.filter((r) => notes.oneDayMove.includes(r.id)).length;
+  const oneDayCount = $derived(groups.find((g) => g.problem === 'one-day')?.reports.length ?? 0);
   const tickets: Record<string, number> = split.tickets;
   const issue = (p: string) => (tickets[p] ? `https://github.com/${split.repo}/issues/${tickets[p]}` : null);
   const fmt = (n: Record<string, number>) =>
@@ -45,7 +49,7 @@
       {@const url = issue(g.problem)}
       <tr>
         <td><code>{g.problem}</code></td>
-        <td><b>{g.reports.length}</b></td>
+        <td><b>{g.reports.length}</b>{#if inside(g)}<span class="small"> incl. {inside(g)} one-day</span>{/if}{#if g.problem === 'one-day'}<span class="small"> also under their cause</span>{/if}</td>
         <td class="small">{fmt(g.shows)}</td>
         <td class="small">{fmt(g.channels)}</td>
         <td>{g.tenants}</td>
@@ -55,7 +59,7 @@
     {/each}
   </tbody>
   <tfoot>
-    <tr><td>all</td><td><b>{groups.reduce((n, g) => n + g.reports.length, 0)}</b></td><td colspan="5" class="small">one problem per report, none left over</td></tr>
+    <tr><td>all</td><td><b>{merged.length}</b></td><td colspan="5" class="small">every report under one cause, none left over; the {oneDayCount} one-day moves are counted under their cause too, as the desk counts</td></tr>
   </tfoot>
 </table>
 

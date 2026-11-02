@@ -1,15 +1,11 @@
-// The problems inside one merged ticket: one per fix, not one per subject line.
-// causes.ts tells `parser` from `hint` by tenant and way in. A report the desk read as a one-day
-// move (desk-notes.json) is neither: a month-first parser swaps day and month, it never moves a
-// date by one day. Those reports are a problem of their own.
+// The problems inside one merged ticket: one per fix, not one per subject line, counted the way the
+// desk counts. causes.ts tells `parser` from `hint` by tenant and way in, and every report is counted
+// under its cause. A report the desk read as a one-day move (desk-notes.json) is neither cause: a
+// month-first parser swaps day and month, it never moves a date by one day. Those reports are a
+// problem of their own, and, as the desk does (readAs in causes.ts), they stay counted where they are filed.
 import { causeOf, type Cause, type Report, type Tenant } from '#lib/kb/causes';
 
 export type Problem = Cause | 'one-day' | 'unplaced';
-
-export function problemOf(r: Report, t: Tenant | undefined, oneDayMove: readonly string[]): Problem {
-  if (oneDayMove.includes(r.id)) return 'one-day';
-  return causeOf(r, t) ?? 'unplaced';
-}
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const DATE = new RegExp(`\\b(\\d{1,2}) (${MONTHS.join('|')})\\b`, 'g');
@@ -40,31 +36,34 @@ export type ProblemGroup = {
 
 const tally = (xs: string[]) => xs.reduce<Record<string, number>>((n, x) => ({ ...n, [x]: (n[x] ?? 0) + 1 }), {});
 
+function group(problem: Problem, rs: Report[]): ProblemGroup {
+  const days = rs.map((r) => r.receivedAt.slice(0, 10)).sort();
+  return {
+    problem,
+    reports: rs,
+    shows: tally(rs.map((r) => bodyShows(r.body))),
+    channels: tally(rs.map((r) => r.channel)),
+    subjects: tally(rs.map((r) => r.subject)),
+    tenants: new Set(rs.map((r) => r.tenant)).size,
+    firstSeen: days[0],
+    lastSeen: days[days.length - 1],
+  };
+}
+
+// Causes first, largest first; then the one-day moves, which are also inside their cause's count.
 export function groupByProblem(
   reports: Report[],
   tenantOf: (r: Report) => Tenant | undefined,
   oneDayMove: readonly string[],
 ): ProblemGroup[] {
-  const byProblem = new Map<Problem, Report[]>();
+  const byCause = new Map<Problem, Report[]>();
   for (const r of reports) {
-    const p = problemOf(r, tenantOf(r), oneDayMove);
-    byProblem.set(p, [...(byProblem.get(p) ?? []), r]);
+    const c = causeOf(r, tenantOf(r)) ?? 'unplaced';
+    byCause.set(c, [...(byCause.get(c) ?? []), r]);
   }
-  return [...byProblem.entries()]
-    .map(([problem, rs]) => {
-      const days = rs.map((r) => r.receivedAt.slice(0, 10)).sort();
-      return {
-        problem,
-        reports: rs,
-        shows: tally(rs.map((r) => bodyShows(r.body))),
-        channels: tally(rs.map((r) => r.channel)),
-        subjects: tally(rs.map((r) => r.subject)),
-        tenants: new Set(rs.map((r) => r.tenant)).size,
-        firstSeen: days[0],
-        lastSeen: days[days.length - 1],
-      };
-    })
-    .sort((a, b) => b.reports.length - a.reports.length);
+  const groups = [...byCause.entries()].map(([p, rs]) => group(p, rs)).sort((a, b) => b.reports.length - a.reports.length);
+  const oneDay = reports.filter((r) => oneDayMove.includes(r.id));
+  return oneDay.length ? [...groups, group('one-day', oneDay)] : groups;
 }
 
 // Subject lines that come in under more than one problem: why merging on subject joined them.
