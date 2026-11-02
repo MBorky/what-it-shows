@@ -40,9 +40,10 @@ are counted there too, the way the desk counts: footnoted where they are filed.
 ## Since then
 
 Engineering closed #4471: `parser` is fixed, and `hint` won't be, because booking-v3's form is retired.
-The update does not name the one-day moves. The desk files them under `parser`, so they close with it,
-and the table above shows each state. If dates still move by one day after the parser fix, that is the
-time-zone problem their ticket describes, and it needs a new ticket.
+The update does not name the one-day moves. The desk files them under `parser` and counts them there,
+so their ticket is a duplicate of the `parser` ticket and closes as one. The table above shows each
+state. If dates still move by one day after the parser fix, that is the time-zone problem their ticket
+describes, and it needs a new ticket.
 
 <Callout kind="warn">
 Merging on the subject line cannot see any of this: the same subject lines come in under different

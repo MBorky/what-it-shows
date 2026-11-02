@@ -18,15 +18,17 @@
   const inside = (g: (typeof groups)[number]) =>
     g.problem === 'one-day' ? 0 : g.reports.filter((r) => notes.oneDayMove.includes(r.id)).length;
   const oneDayCount = $derived(groups.find((g) => g.problem === 'one-day')?.reports.length ?? 0);
-  // Where each problem stands after the engineering update. A problem the update does not name takes the
-  // state of the cause the desk files its reports under, as the desk counts them; with no such cause it is open.
+  // Where each problem stands after the engineering update. A problem the update does not name, whose
+  // reports the desk files under one cause, is a duplicate of that cause's ticket, as the desk merges
+  // duplicates; with no such cause it is open.
   const states: Record<string, { status: string; reason: string }> = update.causes;
   const filedUnder = (g: (typeof groups)[number]) => [...new Set(g.reports.map((r) => causeOf(r, tenantOf(r)) ?? 'unplaced'))];
   const state = (g: (typeof groups)[number]) => {
     if (states[g.problem]) return states[g.problem];
     const under = filedUnder(g);
-    const s = under.length === 1 ? states[under[0]] : undefined;
-    return s ? { status: s.status, reason: `filed under ${under[0]}: ${s.reason}` } : { status: 'open', reason: 'not in the engineering update' };
+    if (under.length === 1 && states[under[0]])
+      return { status: 'duplicate', reason: `of ${under[0]}${tickets[under[0]] ? ` (#${tickets[under[0]]})` : ''}, where the desk files its reports` };
+    return { status: 'open', reason: 'not in the engineering update' };
   };
   const openCount = $derived(groups.filter((g) => state(g).status === 'open').length);
   const tickets: Record<string, number> = split.tickets;
