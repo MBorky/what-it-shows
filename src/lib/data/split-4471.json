@@ -1,4 +1,8 @@
 {
   "repo": "MBorky/what-it-shows",
-  "tickets": {}
+  "tickets": {
+    "parser": 1,
+    "hint": 2,
+    "one-day": 3
+  }
 }
