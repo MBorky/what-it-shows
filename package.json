@@ -1,0 +1,19 @@
+{
+  "name": "support-kb",
+  "private": true,
+  "type": "module",
+  "description": "Build files for the support kb export. The export came without them; they only render src/ as it is.",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite dev",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "3.0.10",
+    "@sveltejs/kit": "2.70.3",
+    "@sveltejs/vite-plugin-svelte": "6.2.4",
+    "mdsvex": "0.12.8",
+    "svelte": "5.57.1",
+    "vite": "7.3.7"
+  }
+}

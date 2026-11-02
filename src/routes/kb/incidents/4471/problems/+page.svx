@@ -1,0 +1,51 @@
+---
+layout: runbook
+title: '#4471 · split by problem'
+owner: support desk
+status: open
+reviewed: 2026-11-02
+signature: MBorky
+---
+
+<script>
+  import ProblemTable from '#lib/kb/ProblemTable.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+</script>
+
+[#4471](/kb/incidents/4471) was merged on the subject line ([decision 0001](/kb/decisions/0001-dedupe-by-subject))
+and marked known: one bug, one fix queued. Read by tenant, by the way each report came in and by what
+its body says, it holds more than one problem, and each needs its own fix. Each now has a ticket.
+
+<ProblemTable ticket={4471} />
+
+## How to tell them apart
+
+**`parser`.** The shared parser reads every date month first, and every tenant on file writes the day
+first, so day and month swap. The bodies say it plainly: the booked date and the date on the invite
+are the same two numbers the other way round. It comes in through the app, by email and through
+booking-v2's form. The queued fix is for this one.
+
+**`hint`.** Booking-v3's form prints `MM/DD/YYYY` under its date field. People type what the hint
+tells them, month first, and the form reads the field the tenant's way, day first. The symptom is the
+same swap, but the code at fault is the form, not the parser: fixing the parser leaves it as it is. It
+only comes in through booking-v3's form.
+
+**`one-day`.** The date moves back by one day, or two people see two days for the same meeting
+("Client in Lisbon got Tuesday. Client in Toronto got Monday."). A month-first parser swaps day and
+month; it never moves a date by one day. This looks like a date-only value passing through a time
+zone. The desk noted these reports as one-day moves, then filed them under `parser` by tenant.
+
+<Callout kind="warn">
+Merging on the subject line cannot see any of this: the same subject lines come in under different
+problems, and nobody reads the body. Decision 0001 needs a new record that replaces it: merge on cause
+(tenant, way in, what the body shows), not on subject.
+</Callout>
+
+## What this page counts
+
+Every number above is computed when the page renders, from `reports-4471.json` (one row per report id),
+the tenant directory and `desk-notes.json`. The logic is in `src/lib/kb/problems.ts`, which uses
+`causeOf` from `causes.ts` for `parser` and `hint`. The tickets are listed in `src/lib/data/split-4471.json`.
+
+<RenderStamp {signature} />
