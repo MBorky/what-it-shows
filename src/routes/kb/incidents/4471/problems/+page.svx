@@ -37,6 +37,12 @@ month; it never moves a date by one day. This looks like a date-only value passi
 zone. The desk noted these reports as one-day moves and files them under `parser` by tenant, so they
 are counted there too, the way the desk counts: footnoted where they are filed.
 
+## Since then
+
+Engineering closed #4471: `parser` is fixed, and `hint` won't be, because booking-v3's form is retired.
+Neither change touches the one-day moves. A fixed parser still sends a date-only value through a time
+zone, so their ticket stays open. The table above shows each state.
+
 <Callout kind="warn">
 Merging on the subject line cannot see any of this: the same subject lines come in under different
 problems, and nobody reads the body. Decision 0001 needs a new record that replaces it: merge on cause
@@ -49,6 +55,6 @@ Every number above is computed when the page renders, from `reports-4471.json` (
 the tenant directory and `desk-notes.json`, with the desk's own rules. The logic is in
 `src/lib/kb/problems.ts`: every report under its cause by `causeOf` from `causes.ts`, and the desk's
 `oneDayMove` notes for `one-day`, still counted where they are filed. The tickets are listed in
-`src/lib/data/split-4471.json`.
+`src/lib/data/split-4471.json`, and the engineering update in `src/lib/data/engineering-4471.json`.
 
 <RenderStamp {signature} />
