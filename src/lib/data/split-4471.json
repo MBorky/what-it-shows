@@ -2,7 +2,6 @@
   "repo": "MBorky/what-it-shows",
   "tickets": {
     "parser": 1,
-    "hint": 2,
-    "one-day": 3
+    "hint": 2
   }
 }

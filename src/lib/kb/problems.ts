@@ -1,13 +1,11 @@
-// The problems inside one merged ticket: one per fix, not one per subject line.
-// causes.ts tells `parser` from `hint` by tenant and way in. A report the desk read as a one-day
-// move (desk-notes.json) is neither: a month-first parser swaps day and month, it never moves a
-// date by one day. Those reports are a problem of their own.
-import { causeOf, type Report, type Tenant } from '#lib/kb/causes';
+// The problems inside one merged ticket: one per cause, not one per subject line.
+// The cause comes from causes.ts (tenant locale, booking form, way in), the same logic the desk runs.
+// Reports the desk read differently (desk-notes.json) stay under their cause and are footnoted.
+import { causeOf, type Cause, type Report, type Tenant } from '#lib/kb/causes';
 
-export type Problem = 'parser' | 'hint' | 'one-day' | 'unplaced';
+export type Problem = Cause | 'unplaced';
 
-export function problemOf(r: Report, t: Tenant | undefined, oneDayMove: readonly string[]): Problem {
-  if (oneDayMove.includes(r.id)) return 'one-day';
+export function problemOf(r: Report, t: Tenant | undefined): Problem {
   return causeOf(r, t) ?? 'unplaced';
 }
 
@@ -40,14 +38,10 @@ export type ProblemGroup = {
 
 const tally = (xs: string[]) => xs.reduce<Record<string, number>>((n, x) => ({ ...n, [x]: (n[x] ?? 0) + 1 }), {});
 
-export function groupByProblem(
-  reports: Report[],
-  tenantOf: (r: Report) => Tenant | undefined,
-  oneDayMove: readonly string[],
-): ProblemGroup[] {
+export function groupByProblem(reports: Report[], tenantOf: (r: Report) => Tenant | undefined): ProblemGroup[] {
   const byProblem = new Map<Problem, Report[]>();
   for (const r of reports) {
-    const p = problemOf(r, tenantOf(r), oneDayMove);
+    const p = problemOf(r, tenantOf(r));
     byProblem.set(p, [...(byProblem.get(p) ?? []), r]);
   }
   return [...byProblem.entries()]

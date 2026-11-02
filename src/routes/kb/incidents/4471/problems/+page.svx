@@ -31,10 +31,11 @@ tells them, month first, and the form reads the field the tenant's way, day firs
 same swap, but the code at fault is the form, not the parser: fixing the parser leaves it as it is. It
 only comes in through booking-v3's form.
 
-**`one-day`.** The date moves back by one day, or two people see two days for the same meeting
-("Client in Lisbon got Tuesday. Client in Toronto got Monday."). A month-first parser swaps day and
-month; it never moves a date by one day. This looks like a date-only value passing through a time
-zone. The desk noted these reports as one-day moves, then filed them under `parser` by tenant.
+**One-day moves.** A few reports the desk read as a date moving back by one day, or two people seeing
+two days for the same meeting ("Client in Lisbon got Tuesday. Client in Toronto got Monday."). The
+desk files them by tenant, so they are counted under `parser` and listed there. A month-first parser
+swaps day and month and does not move a date by one day, so the `parser` ticket names them: if they
+outlast the parser fix, they are a time-zone problem of their own.
 
 <Callout kind="warn">
 Merging on the subject line cannot see any of this: the same subject lines come in under different
@@ -45,7 +46,7 @@ problems, and nobody reads the body. Decision 0001 needs a new record that repla
 ## What this page counts
 
 Every number above is computed when the page renders, from `reports-4471.json` (one row per report id),
-the tenant directory and `desk-notes.json`. The logic is in `src/lib/kb/problems.ts`, which uses
-`causeOf` from `causes.ts` for `parser` and `hint`. The tickets are listed in `src/lib/data/split-4471.json`.
+the tenant directory and `desk-notes.json`. The logic is in `src/lib/kb/problems.ts`, which groups by
+`causeOf` from `causes.ts`, the rule the desk runs. The tickets are listed in `src/lib/data/split-4471.json`.
 
 <RenderStamp {signature} />
