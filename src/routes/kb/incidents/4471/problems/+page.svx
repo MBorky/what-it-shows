@@ -4,7 +4,7 @@ title: '#4471 · split by problem'
 owner: support desk
 status: closed
 reviewed: 2026-11-02
-signature: MBorky
+signature: 'v1.eyJzdWIiOiI0MzEiLCJhdWQiOiJjaGFsbGVuZ2U6d2hhdC1pdC1zaG93cyIsImlhdCI6MTc5MzY1MDgyNywiZXhwIjoxNzkzNzM3MjI3fQ.U282P7vQyvX59L4etr-64eCWXcmu6HljEd5rpqbh-CY'
 ---
 
 <script>
