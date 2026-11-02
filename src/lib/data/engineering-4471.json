@@ -3,7 +3,7 @@
   "closed": "2026-10-05",
   "source": "engineering update, as the desk posted it",
   "causes": {
-    "parser": { "status": "fixed", "reason": "fix(dates): parse dd/mm for eu locales" },
-    "hint": { "status": "won't fix", "reason": "booking-v3 form retired" }
+    "parser": { "status": "fixed", "reason": "fix(dates): parse dd/mm for eu locales", "issue": 1 },
+    "hint": { "status": "won't fix", "reason": "booking-v3 form retired", "issue": 2 }
   }
 }
