@@ -3,7 +3,7 @@
   import notes from '#lib/data/desk-notes.json';
   import split from '#lib/data/split-4471.json';
   import update from '#lib/data/engineering-4471.json';
-  import { uniqueById, type Report } from '#lib/kb/causes';
+  import { causeOf, uniqueById, type Report } from '#lib/kb/causes';
   import { tenantOf } from '#lib/kb/locales';
   import { bodyShows, groupByProblem, sharedSubjects } from '#lib/kb/problems';
 
@@ -18,10 +18,17 @@
   const inside = (g: (typeof groups)[number]) =>
     g.problem === 'one-day' ? 0 : g.reports.filter((r) => notes.oneDayMove.includes(r.id)).length;
   const oneDayCount = $derived(groups.find((g) => g.problem === 'one-day')?.reports.length ?? 0);
-  // Where each problem stands after the engineering update; a problem the update does not name is still open.
+  // Where each problem stands after the engineering update. A problem the update does not name takes the
+  // state of the cause the desk files its reports under, as the desk counts them; with no such cause it is open.
   const states: Record<string, { status: string; reason: string }> = update.causes;
-  const state = (p: string) => states[p] ?? { status: 'open', reason: 'not in the engineering update' };
-  const openCount = $derived(groups.filter((g) => !states[g.problem]).length);
+  const filedUnder = (g: (typeof groups)[number]) => [...new Set(g.reports.map((r) => causeOf(r, tenantOf(r)) ?? 'unplaced'))];
+  const state = (g: (typeof groups)[number]) => {
+    if (states[g.problem]) return states[g.problem];
+    const under = filedUnder(g);
+    const s = under.length === 1 ? states[under[0]] : undefined;
+    return s ? { status: s.status, reason: `filed under ${under[0]}: ${s.reason}` } : { status: 'open', reason: 'not in the engineering update' };
+  };
+  const openCount = $derived(groups.filter((g) => state(g).status === 'open').length);
   const tickets: Record<string, number> = split.tickets;
   const issue = (p: string) => (tickets[p] ? `https://github.com/${split.repo}/issues/${tickets[p]}` : null);
   const fmt = (n: Record<string, number>) =>
@@ -62,7 +69,7 @@
         <td>{g.tenants}</td>
         <td class="small">{g.firstSeen} → {g.lastSeen}</td>
         <td>{#if url}<a href={url}>{split.repo}#{tickets[g.problem]}</a>{:else}<span class="todo">not filed</span>{/if}</td>
-        <td class:open={!states[g.problem]}><b>{state(g.problem).status}</b><span class="small"> · {state(g.problem).reason}</span></td>
+        <td class:open={state(g).status === 'open'}><b>{state(g).status}</b><span class="small"> · {state(g).reason}</span></td>
       </tr>
     {/each}
   </tbody>

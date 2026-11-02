@@ -2,7 +2,7 @@
 layout: runbook
 title: '#4471 · split by problem'
 owner: support desk
-status: open
+status: closed
 reviewed: 2026-11-02
 signature: MBorky
 ---
@@ -40,8 +40,9 @@ are counted there too, the way the desk counts: footnoted where they are filed.
 ## Since then
 
 Engineering closed #4471: `parser` is fixed, and `hint` won't be, because booking-v3's form is retired.
-Neither change touches the one-day moves. A fixed parser still sends a date-only value through a time
-zone, so their ticket stays open. The table above shows each state.
+The update does not name the one-day moves. The desk files them under `parser`, so they close with it,
+and the table above shows each state. If dates still move by one day after the parser fix, that is the
+time-zone problem their ticket describes, and it needs a new ticket.
 
 <Callout kind="warn">
 Merging on the subject line cannot see any of this: the same subject lines come in under different
